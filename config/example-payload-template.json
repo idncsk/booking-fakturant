@@ -1,0 +1,32 @@
+{
+    "okruh": 1,
+    "partner": {
+        "nazov_firmy": "",
+        "kod_krajiny": "SK",
+        "ulica": "-",
+        "obec": "-",
+        "psc": "-"
+    },
+    "doklad": {
+        "dodavatel": "Nazov sablony",
+        "update_dokladu": false,
+        "datum_vystavenia": "1.1.2999",
+        "datum_dodania": "1.1.2999",
+        "datum_splatnosti": "1.1.2999",
+        "prijemka_vydajka": false,
+        "text_zaver": "",
+        "ceny_su_s_dph": true,
+        "vyhotovil": "Booking Fakturant",
+        "kontakt": "Tel: +421 905 123 456, Email: ai@uradprace.sk",
+        "polozky": [
+            {
+                "poradove_cislo": 1,
+                "nazov_karty": "Ubytovanie 123",
+                "mnozstvo_hodnota": 2,
+                "mnozstvo_jednotka": "d",
+                "cena_spolu": 10,
+                "dph_perc": 10
+            }
+        ]
+    }
+}

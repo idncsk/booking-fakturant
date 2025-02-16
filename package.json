@@ -1,0 +1,70 @@
+{
+  "name": "Booking Fakturant",
+  "version": "1.0.0",
+  "description": "Elektron aplikácia pre spracovanie booking.com objednávok do faktúr",
+  "main": "dist/main.js",
+  "scripts": {
+    "start": "npm run build && electron .",
+    "build": "tsc && npm run copy-files",
+    "copy-files": "cp src/index.html dist/ && mkdir -p dist/assets && cp assets/* dist/assets/ 2>/dev/null || true",
+    "watch": "tsc -w",
+    "dev": "cross-env NODE_ENV=development concurrently \"npm run watch\" \"electron .\"",
+    "pack": "npm run build && electron-builder --dir",
+    "dist": "npm run build && electron-builder",
+    "dist:win": "npm run build && electron-builder --win",
+    "dist:linux": "npm run build && electron-builder --linux",
+    "release": "electron-builder --publish always"
+  },
+  "build": {
+    "appId": "com.booking.fakturant",
+    "productName": "Booking-Fakturant",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "portable",
+      "icon": "assets/icon.ico",
+      "artifactName": "${productName}-${version}.exe"
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "icon": "assets/icon.png",
+      "category": "Office",
+      "maintainer": "idnc_sk <me@idnc.sk>",
+      "vendor": "idnc_sk",
+      "synopsis": "Process booking.com CSV data into invoices",
+      "artifactName": "${productName}-${version}.${ext}"
+    },
+    "publish": {
+      "provider": "github",
+      "releaseType": "release"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com:idncsk/booking-fakturant.git"
+  },
+  "author": "idnc_sk <me@idnc.sk>",
+  "homepage": "https://idnc.sk",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.11.19",
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "electron": "^28.2.3",
+    "electron-builder": "^24.13.3",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "csv-parse": "^5.5.3",
+    "ini": "^4.1.1"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

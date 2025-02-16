@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Booking Fakturant</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .button-group {
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .file-list {
+            margin-bottom: 20px;
+        }
+        .file-item {
+            padding: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .status-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+        }
+        .status-item {
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+        }
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Invoice Processor</h1>
+
+        <div class="button-group">
+            <button id="loadData">Load Data</button>
+            <button id="addFile">Add File</button>
+            <button id="processFile" disabled>Process Selected Files</button>
+        </div>
+
+        <div class="file-list" id="fileList">
+            <h3>Files to Process</h3>
+            <!-- Files will be listed here -->
+        </div>
+
+        <div class="status-list" id="statusList">
+            <h3>Processing Status</h3>
+            <!-- Status messages will be shown here -->
+        </div>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        let selectedFiles = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const loadDataBtn = document.getElementById('loadData');
+            const addFileBtn = document.getElementById('addFile');
+            const processFileBtn = document.getElementById('processFile');
+            const fileList = document.getElementById('fileList');
+            const statusList = document.getElementById('statusList');
+
+            // Load Data button click handler
+            loadDataBtn.addEventListener('click', async () => {
+                const files = await ipcRenderer.invoke('scan-incoming');
+                updateFileList(files);
+            });
+
+            // Add File button click handler
+            addFileBtn.addEventListener('click', async () => {
+                const files = await ipcRenderer.invoke('select-files');
+                if (files.length > 0) {
+                    updateFileList([...selectedFiles, ...files]);
+                }
+            });
+
+            // Process File button click handler
+            processFileBtn.addEventListener('click', async () => {
+                processFileBtn.disabled = true;
+
+                for (const file of selectedFiles) {
+                    try {
+                        const results = await ipcRenderer.invoke('process-file', file);
+                        results.forEach(result => {
+                            addStatusMessage(result.message, result.success);
+                        });
+                    } catch (error) {
+                        addStatusMessage(`Error processing ${file}: ${error}`, false);
+                    }
+                }
+
+                // Refresh file list after processing
+                const remainingFiles = await ipcRenderer.invoke('scan-incoming');
+                updateFileList(remainingFiles);
+                processFileBtn.disabled = false;
+            });
+
+            function updateFileList(files) {
+                selectedFiles = files;
+                const fileListContent = document.createElement('div');
+
+                if (files.length === 0) {
+                    fileListContent.innerHTML = '<p>No files to process</p>';
+                    processFileBtn.disabled = true;
+                } else {
+                    files.forEach(file => {
+                        const fileItem = document.createElement('div');
+                        fileItem.className = 'file-item';
+                        fileItem.textContent = file;
+                        fileListContent.appendChild(fileItem);
+                    });
+                    processFileBtn.disabled = false;
+                }
+
+                // Clear and update file list
+                while (fileList.children.length > 1) {
+                    fileList.removeChild(fileList.lastChild);
+                }
+                fileList.appendChild(fileListContent);
+            }
+
+            function addStatusMessage(message, success) {
+                const statusItem = document.createElement('div');
+                statusItem.className = `status-item ${success ? 'status-success' : 'status-error'}`;
+
+                // Add timestamp
+                const timestamp = new Date().toLocaleTimeString();
+                statusItem.textContent = `[${timestamp}] ${message}`;
+
+                statusList.appendChild(statusItem);
+                statusList.scrollTop = statusList.scrollHeight;
+            }
+
+            // Initial load of files
+            loadDataBtn.click();
+        });
+    </script>
+</body>
+</html>
