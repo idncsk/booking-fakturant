@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Directories
-SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-ROOT_DIR=$(cd "$(dirname "$SCRIPT_DIR")" && pwd)
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+ROOT_DIR=$(dirname "$SCRIPT_DIR")
 DATA_DIR="$ROOT_DIR/data"
-LOG_DIR="$ROOT_DIR/log"
+LOG_DIR="$ROOT_DIR/logs"
 
 # Runtime directories
 DIR_INCOMING="$DATA_DIR/incoming"
